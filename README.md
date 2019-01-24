@@ -9,7 +9,28 @@ The data folder contains classes or modules relevant to data and data processing
 The ml folder contains classes that define classifiers.
 
 ## Conventions
-- Internally, all data is passed around in lists of dictionaries. Each dictionary maps the column name to the value for that instance.
+### Internal Data Structures
+Internally, all data is passed around as lists of dictionaries. Each dictionary maps the column name to the value for that instance. E.g. the csv file
+```
+userId,movieId,rating
+1,1,4.0
+1,2,3.5
+```
+would be structured like
+```
+[
+  {
+    'userId': 1,
+    'movieId': 1,
+    'rating': 4.0
+  },
+  {
+    'userId': 1,
+    'movieId': 2,
+    'rating': 3.5
+  }
+]
+```
 
 ## Note
 We gon win this thing ez.
