@@ -3,14 +3,18 @@
 ## Organization
 ### csv
 The config file assumes you store all of your csv files in a folder named csv.
+### src
+The source folder contains following sub-folders: **data**, **ml**, **visual**.
 ### data
-The data folder contains classes or modules relevant to data and data processing.
+The data sub-folder contains classes or modules relevant to data and data processing.
 ### ml
-The ml folder contains classes that define classifiers.
+The ml sub-folder contains classes that define classifiers.
+### visual 
+The visual sub-folder contains Jupyter notebook that provides data visualization.
 
 ## Conventions
 ### Internal Data Structures
-Internally, all data is passed around as lists of dictionaries. Each dictionary maps the column name to the value for that instance. E.g. the csv file
+Internally, all data is passed around as numpy arrays or pandas dataframe . Each numpy array contains a header that will allow fast access to the value for that instance. E.g. the csv file
 ```
 userId,movieId,rating
 1,1,4.0
@@ -18,19 +22,9 @@ userId,movieId,rating
 ```
 would be structured like
 ```
-[
-  {
-    'userId': 1,
-    'movieId': 1,
-    'rating': 4.0
-  },
-  {
-    'userId': 1,
-    'movieId': 2,
-    'rating': 3.5
-  }
-]
+[[1.  1.  4. ]
+ [1.  2.  3.5]]
 ```
-
 ## Note
-We gon win this thing ez.
+We gon win this thing ez. 
+I concur. 
