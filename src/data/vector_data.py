@@ -39,7 +39,8 @@ class DataProcessor():
         for i in range(1, maxNum_users + 1):
             user_tuples = train_ratings.loc[train_ratings['userId'] == i]
             rated_movies = movies[movies['movieId'].isin(user_tuples['movieId'])]
-            average = rated_movies.sum(axis=0) / rated_movies.shape[0]
+            weighted_movies = rated_movies.mul(np.array(user_tuples['rating']), axis=0)
+            average = weighted_movies.sum(axis=0)
             average[0] = i
             average_rating = user_tuples['rating'].sum() / user_tuples.shape[0]
             users[i - 1] = np.append(np.array(average), average_rating)
