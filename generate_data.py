@@ -3,7 +3,7 @@ import pandas as pd
 data_dir = "csv/"
 
 if __name__ == "__main__":
-    movies = pd.read_csv(data_dir + "genome-scores.csv")
+    movies = pd.read_csv(data_dir + "genome-scores_toy.csv")
     movies_pivot = movies.pivot(index="movieId", columns="tagId", values="relevance")
     train_ratings = pd.read_csv(data_dir + "train_ratings.csv")
     for userId in train_ratings["userId"].unique():
@@ -16,4 +16,9 @@ if __name__ == "__main__":
             user_vector.to_csv(data_dir + "user_vectors.csv", mode='a', header=True, index=False)
         else:
             user_vector.to_csv(data_dir + "user_vectors.csv", mode='a', header=False, index=False)
-    pd.DataFrame(movies_pivot).to_csv("movies_vectors.csv", index=False)
+
+    # Save the movieId column so that we can reconstruct the DF later on
+    pd.DataFrame(movies_pivot).to_csv("movies_vectors.csv", index=True)
+
+    # Loads the DF while ignoring panda's default 0 ... n index values
+    # df = pd.read_csv("./movies_vectors_toy.csv", index_col=0)
