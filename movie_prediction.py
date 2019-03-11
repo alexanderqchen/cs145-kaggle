@@ -8,6 +8,7 @@ from pyspark.sql.functions import udf, col, avg
 from pyspark.sql.types import ArrayType, StringType, IntegerType, BooleanType
 
 script_dir = os.path.dirname(__file__)
+space_dir = "/space"
 
 # TASK 1
 def get_initial_dfs(context, saved_initial_dfs):
@@ -40,14 +41,14 @@ def get_initial_dfs(context, saved_initial_dfs):
         ).groupBy("userId").agg(*(avg(c).alias(c) for c in movie_vectors.columns[1:]))
 
         print("Saving parquets.")
-        movie_vectors.write.parquet(os.path.join(script_dir, parquet_dir + "movie_vectors.parquet"))
-        user_vectors.write.parquet(os.path.join(script_dir, parquet_dir + "user_vectors.parquet"))
-        train_ratings.write.parquet(os.path.join(script_dir, parquet_dir + "train_ratings.parquet"))
+        movie_vectors.write.parquet(os.path.join(space_dir, parquet_dir + "movie_vectors.parquet"))
+        user_vectors.write.parquet(os.path.join(space_dir, parquet_dir + "user_vectors.parquet"))
+        train_ratings.write.parquet(os.path.join(space_dir, parquet_dir + "train_ratings.parquet"))
     else:
         # load parquets
-        movie_vectors = context.read.parquet(os.path.join(script_dir, parquet_dir + "movie_vectors.parquet"))
-        user_vectors = context.read.parquet(os.path.join(script_dir, parquet_dir + "user_vectors.parquet"))
-        train_ratings = context.read.parquet(os.path.join(script_dir, parquet_dir + "train_ratings.parquet"))
+        movie_vectors = context.read.parquet(os.path.join(space_dir, parquet_dir + "movie_vectors.parquet"))
+        user_vectors = context.read.parquet(os.path.join(space_dir, parquet_dir + "user_vectors.parquet"))
+        train_ratings = context.read.parquet(os.path.join(space_dir, parquet_dir + "train_ratings.parquet"))
 
     return movie_vectors, user_vectors, train_ratings
 
@@ -434,7 +435,7 @@ def main(context):
 
 if __name__ == "__main__":
     conf = SparkConf().setAppName("CS143 Project 2B")
-    conf = conf.setMaster("local[*]")
+    conf = conf.setMaster("local[*]").set("spark.executor.memory", "16G").set("spark.driver.memory", "16G").set("spark.local.dir", space_dir)
     sc = SparkContext(conf=conf)
     sql_context = SQLContext(sc)
     main(sql_context)
