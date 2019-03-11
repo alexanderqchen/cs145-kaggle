@@ -70,18 +70,17 @@ def calculate_paired_vectors(context, movie, user, train, val, test, saved_paire
         user_alias = user.select("userId", *((col(c)).alias("user_" + c) for c in user.columns[1:]))
 
         print("Calculating training vector.")
-        train_vec = train.limit(1).join(movie_alias, "movieId").join(user_alias, "userId").select(
+        train_vec = train.join(movie_alias, "movieId").join(user_alias, "userId").select(
             "rating",
             *((col("movie_" + c) * col("user_" + c)).alias(c) for c in movie.columns[1:]))
 
         print("Calculating validation vector.")
-        val_vec = val.limit(1).join(movie_alias, "movieId").join(user_alias, "userId").select(
+        val_vec = val.join(movie_alias, "movieId").join(user_alias, "userId").select(
             "rating",
             *((col("movie_" + c) * col("user_" + c)).alias(c) for c in movie.columns[1:]))
 
         print("Calculating test vector.")
-        test_vec = test.limit(1).join(movie_alias, "movieId").join(user_alias, "userId").select(
-            "rating",
+        test_vec = test.join(movie_alias, "movieId").join(user_alias, "userId").select(
             *((col("movie_" + c) * col("user_" + c)).alias(c) for c in movie.columns[1:]))
 
         print("Saving parquets.")
