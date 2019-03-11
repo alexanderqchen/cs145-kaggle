@@ -10,7 +10,7 @@ from pyspark.sql.functions import avg, col, udf
 from pyspark.sql.types import FloatType
 
 script_dir = os.path.dirname(__file__)
-space_dir = "/space"
+space_dir = script_dir
 data_dir = "csv/"
 parquet_dir = "parquets/"
 models_dir = "models/"
@@ -149,10 +149,9 @@ def predict_scores(model, test):
     cutoff_udf = udf(cutoff, FloatType())
     result = model.transform(assembler.transform(test)).select(
         "Id",
-        cutoff_udf("prediction").alias("rating")
-    )
+        cutoff_udf("prediction").alias("rating"))
     result.write.format("com.databricks.spark.csv").option("header", "true").save(
-        os.path.join(script_dir, data_dir + "comment_score.csv"))
+        os.path.join(script_dir, data_dir + "result.csv"))
 
 
 def main(context):
@@ -170,7 +169,7 @@ def main(context):
 
 if __name__ == "__main__":
     conf = SparkConf().setAppName("CS145 Project")
-    conf = conf.setMaster("local[*]").set("spark.executor.memory", "16G").set("spark.driver.memory", "16G").set(
+    conf = conf.setMaster("local[*]").set("spark.executor.memory", "16G").set("spark.driver.memory", "768G").set(
         "spark.local.dir", space_dir)
     sc = SparkContext(conf=conf)
     sql_context = SQLContext(sc)
