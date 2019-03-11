@@ -29,7 +29,18 @@ def get_initial_dfs(context, saved_initial_dfs):
             col("userId").cast("int").alias("userId"),
             col("movieId").cast("int").alias("movieId"),
             col("rating").cast("float").alias("rating"))
-        print("Loaded genome scores and train ratings.")
+        val_ratings = context.read.format("csv").option("header", "true").load(
+            os.path.join(script_dir, data_dir + "val_ratings.csv"))
+        val_ratings = val_ratings.select(
+            col("userId").cast("int").alias("userId"),
+            col("movieId").cast("int").alias("movieId"),
+            col("rating").cast("float").alias("rating"))
+        test_ratings = context.read.format("csv").option("header", "true").load(
+            os.path.join(script_dir, data_dir + "test_ratings.csv"))
+        test_ratings = test_ratings.select(
+            col("userId").cast("int").alias("userId"),
+            col("movieId").cast("int").alias("movieId"))
+        print("Loaded genome scores and ratings.")
 
         print("Calculating movie vector.")
         movie_vectors = genome_scores.groupBy("movieId").pivot("tagId").sum("relevance")
@@ -44,13 +55,17 @@ def get_initial_dfs(context, saved_initial_dfs):
         movie_vectors.write.parquet(os.path.join(space_dir, parquet_dir + "movie_vectors.parquet"))
         user_vectors.write.parquet(os.path.join(space_dir, parquet_dir + "user_vectors.parquet"))
         train_ratings.write.parquet(os.path.join(space_dir, parquet_dir + "train_ratings.parquet"))
+        val_ratings.write.parquet(os.path.join(space_dir, parquet_dir + "val_ratings.parquet"))
+        test_ratings.write.parquet(os.path.join(space_dir, parquet_dir + "test_ratings.parquet"))
     else:
         # load parquets
         movie_vectors = context.read.parquet(os.path.join(space_dir, parquet_dir + "movie_vectors.parquet"))
         user_vectors = context.read.parquet(os.path.join(space_dir, parquet_dir + "user_vectors.parquet"))
         train_ratings = context.read.parquet(os.path.join(space_dir, parquet_dir + "train_ratings.parquet"))
+        val_ratings = context.read.parquet(os.path.join(space_dir, parquet_dir + "val_ratings.parquet"))
+        test_ratings = context.read.parquet(os.path.join(space_dir, parquet_dir + "test_ratings.parquet"))
 
-    return movie_vectors, user_vectors, train_ratings
+    return movie_vectors, user_vectors, train_ratings, val_ratings, test_ratings
 
 
 def compute_labeled_sanitized_comments(comments, labels):
@@ -430,7 +445,7 @@ def main(context):
     saved_trained_models = False
     predicted_sentiment = False
 
-    movie_vectors, user_vectors, train_ratings = get_initial_dfs(context, saved_initial_dfs)
+    movie_vectors, user_vectors, train_ratings, val_ratings, test_ratings = get_initial_dfs(context, saved_initial_dfs)
 
 
 if __name__ == "__main__":
