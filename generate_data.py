@@ -13,7 +13,7 @@ if __name__ == "__main__":
         user_vector = user_vector[user_vector.columns[1:]]
         user_vector.insert(0, "userId", userId)
         if userId == 1:
-            user_vector.to_csv(data_dir + "user_vectors.csv", mode='a', header=True)
+            user_vector.to_csv(data_dir + "user_vectors.csv", mode='a', header=True, index=False)
         else:
-            user_vector.to_csv(data_dir + "user_vectors.csv", mode='a', header=False)
+            user_vector.to_csv(data_dir + "user_vectors.csv", mode='a', header=False, index=False)
     pd.DataFrame(movies_pivot).to_csv("movies_vectors.csv", index=False)
