@@ -39,6 +39,7 @@ def get_initial_dfs(context, saved_initial_dfs):
         test_ratings = context.read.format("csv").option("header", "true").load(
             os.path.join(script_dir, data_dir + "test_ratings.csv"))
         test_ratings = test_ratings.select(
+            col("Id").cast("int").alias("Id"),
             col("userId").cast("int").alias("userId"),
             col("movieId").cast("int").alias("movieId"))
         print("Loaded genome scores and ratings.")
