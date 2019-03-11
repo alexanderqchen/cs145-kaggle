@@ -1,22 +1,17 @@
-from __future__ import print_function
-
 import os
 
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext
-from pyspark.sql.functions import udf, col, avg
-from pyspark.sql.types import ArrayType, StringType, IntegerType, BooleanType
+from pyspark.sql.functions import col, avg
 
 script_dir = os.path.dirname(__file__)
 space_dir = "/space"
+data_dir = "csv/"
+parquet_dir = "parquets/"
 
-# TASK 1
+
 def get_initial_dfs(context, saved_initial_dfs):
-    data_dir = "csv/"
-    parquet_dir = "parquets/"
-
     if not saved_initial_dfs:
-        # load csv and json files
         genome_scores = context.read.format("csv").option("header", "true").load(
             os.path.join(script_dir, data_dir + "genome-scores.csv"))
         genome_scores = genome_scores.select(
@@ -44,6 +39,7 @@ def get_initial_dfs(context, saved_initial_dfs):
 
         print("Calculating movie vector.")
         movie_vectors = genome_scores.groupBy("movieId").pivot("tagId").sum("relevance")
+
         print("Calculating user vector.")
         user_vectors = train_ratings.join(movie_vectors, train_ratings.movieId == movie_vectors.movieId).select(
             "userId",
@@ -66,6 +62,38 @@ def get_initial_dfs(context, saved_initial_dfs):
         test_ratings = context.read.parquet(os.path.join(space_dir, parquet_dir + "test_ratings.parquet"))
 
     return movie_vectors, user_vectors, train_ratings, val_ratings, test_ratings
+
+
+def calculate_paired_vectors(context, movie, user, train, val, test, saved_paired_vectors):
+    if not saved_paired_vectors:
+        movie_alias = movie.select("movieId", *((col(c)).alias("movie_" + c) for c in movie.columns[1:]))
+        user_alias = user.select("userId", *((col(c)).alias("user_" + c) for c in user.columns[1:]))
+
+        print("Calculating training vector.")
+        train_vec = train.limit(1).join(movie_alias, "movieId").join(user_alias, "userId").select(
+            "rating",
+            *((col("movie_" + c) * col("user_" + c)).alias(c) for c in movie.columns[1:]))
+
+        print("Calculating validation vector.")
+        val_vec = val.limit(1).join(movie_alias, "movieId").join(user_alias, "userId").select(
+            "rating",
+            *((col("movie_" + c) * col("user_" + c)).alias(c) for c in movie.columns[1:]))
+
+        print("Calculating test vector.")
+        test_vec = test.limit(1).join(movie_alias, "movieId").join(user_alias, "userId").select(
+            "rating",
+            *((col("movie_" + c) * col("user_" + c)).alias(c) for c in movie.columns[1:]))
+
+        print("Saving parquets.")
+        train_vec.write.parquet(os.path.join(space_dir, parquet_dir + "train_vec.parquet"))
+        val_vec.write.parquet(os.path.join(space_dir, parquet_dir + "val_vec.parquet"))
+        test_vec.write.parquet(os.path.join(space_dir, parquet_dir + "test_vec.parquet"))
+    else:
+        train_vec = context.read.parquet(os.path.join(space_dir, parquet_dir + "train_vec.parquet"))
+        val_vec = context.read.parquet(os.path.join(space_dir, parquet_dir + "val_vec.parquet"))
+        test_vec = context.read.parquet(os.path.join(space_dir, parquet_dir + "test_vec.parquet"))
+
+    return train_vec, val_vec, test_vec
 
 
 def compute_labeled_sanitized_comments(comments, labels):
@@ -441,11 +469,12 @@ def save_csvs(context, predicted_comments):
 
 
 def main(context):
-    saved_initial_dfs = False
-    saved_trained_models = False
-    predicted_sentiment = False
+    saved_initial_dfs = True
+    saved_paired_vectors = False
 
     movie_vectors, user_vectors, train_ratings, val_ratings, test_ratings = get_initial_dfs(context, saved_initial_dfs)
+    train_vec, val_vec, test_vec = calculate_paired_vectors(context, movie_vectors, user_vectors, train_ratings,
+                                                            val_ratings, test_ratings, saved_paired_vectors)
 
 
 if __name__ == "__main__":
