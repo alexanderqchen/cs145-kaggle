@@ -136,7 +136,7 @@ def main(context):
 
 if __name__ == "__main__":
     conf = SparkConf().setAppName("CS145 Project")
-    conf = conf.setMaster("local[*]").set("spark.executor.memory", "768G").set("spark.driver.memory", "768G").set(
+    conf = conf.setMaster("local[*]").set("spark.executor.memory", "128G").set("spark.driver.memory", "768G").set(
         "spark.local.dir", "/tmp")
     sc = SparkContext(conf=conf)
     sql_context = SQLContext(sc)
