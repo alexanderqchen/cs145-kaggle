@@ -1,4 +1,5 @@
 import os
+import math
 
 from pyspark import SparkConf, SparkContext
 from pyspark.ml.feature import VectorAssembler
@@ -102,7 +103,9 @@ def train_model(saved_trained_model, train):
 
 
 def cutoff(x):
-    if x > 5.0:
+    if math.isnan(x):
+        return 3.5
+    elif x > 5.0:
         return 5.0
     elif x < 0.5:
         return 0.5
