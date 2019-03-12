@@ -3,8 +3,7 @@ import os
 from pyspark import SparkConf, SparkContext
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.ml.feature import VectorAssembler
-from pyspark.ml.regression import LinearRegression
-from pyspark.ml.tuning import CrossValidator, CrossValidatorModel, ParamGridBuilder
+from pyspark.ml.regression import LinearRegression, LinearRegressionModel
 from pyspark.sql import SQLContext
 from pyspark.sql.functions import avg, col, udf
 from pyspark.sql.types import FloatType
@@ -109,20 +108,11 @@ def train_model(saved_trained_model, train):
             outputCol='features')
 
         lr = LinearRegression(labelCol="rating", featuresCol="features")
-        evaluator = RegressionEvaluator(labelCol="rating")
-        param_grid = ParamGridBuilder().addGrid(lr.regParam, [0, 0.1, 0.5, 1.0]).build()
-
-        cross_val = CrossValidator(
-            estimator=lr,
-            evaluator=evaluator,
-            estimatorParamMaps=param_grid,
-            numFolds=5)
-
         print("Training model...")
-        model = cross_val.fit(assembler.transform(train))
+        model = lr.fit(assembler.transform(train))
         model.save(os.path.join(space_dir, models_dir + "movies.model"))
     else:
-        model = CrossValidatorModel.load(os.path.join(space_dir, models_dir + "movies.model"))
+        model = LinearRegressionModel.load(os.path.join(space_dir, models_dir + "movies.model"))
     return model
 
 
@@ -131,7 +121,8 @@ def print_val_score(model, val):
         inputCols=[c for c in val.columns[1:]],
         outputCol='features')
 
-    RegressionEvaluator(labelCol="rating").evaluate(model.transform(assembler.transform(val)))
+    print("Getting validation score...")
+    print(RegressionEvaluator(labelCol="rating").evaluate(model.transform(assembler.transform(val))))
 
 
 def cutoff(x):
@@ -150,27 +141,29 @@ def predict_scores(model, test):
     result = model.transform(assembler.transform(test)).select(
         "Id",
         cutoff_udf("prediction").alias("rating"))
-    result.write.format("com.databricks.spark.csv").option("header", "true").save(
+
+    print("Generating result.csv")
+    result.coalesce(1).write.format("com.databricks.spark.csv").option("header", "true").save(
         os.path.join(script_dir, data_dir + "result.csv"))
 
 
 def main(context):
     saved_initial_dfs = True
     saved_paired_vectors = True
-    saved_trained_model = False
+    saved_trained_model = True
 
     movie_vectors, user_vectors, train_ratings, val_ratings, test_ratings = get_initial_dfs(context, saved_initial_dfs)
     train_vec, val_vec, test_vec = calculate_paired_vectors(context, movie_vectors, user_vectors, train_ratings,
                                                             val_ratings, test_ratings, saved_paired_vectors)
     model = train_model(saved_trained_model, train_vec)
-    print_val_score(model, val_vec)
+    #print_val_score(model, val_vec)
     predict_scores(model, test_vec)
 
 
 if __name__ == "__main__":
     conf = SparkConf().setAppName("CS145 Project")
-    conf = conf.setMaster("local[*]").set("spark.executor.memory", "16G").set("spark.driver.memory", "768G").set(
-        "spark.local.dir", space_dir)
+    conf = conf.setMaster("local[*]").set("spark.executor.memory", "768G").set("spark.driver.memory", "768G").set(
+        "spark.local.dir", "/tmp")
     sc = SparkContext(conf=conf)
     sql_context = SQLContext(sc)
     main(sql_context)
