@@ -89,7 +89,8 @@ def train_model(saved_trained_model, train):
     if not saved_trained_model:
         assembler = VectorAssembler(
             inputCols=[c for c in train.columns[1:]],
-            outputCol='features')
+            outputCol="features",
+            handleInvalid="keep")
 
         lr = LinearRegression(labelCol="rating", featuresCol="features")
         print("Training model...")
@@ -111,11 +112,12 @@ def cutoff(x):
 def predict_scores(model, test):
     assembler = VectorAssembler(
         inputCols=[c for c in test.columns[1:]],
-        outputCol="features")
+        outputCol="features",
+        handleInvalid="keep")
     cutoff_udf = udf(cutoff, FloatType())
     result = model.transform(assembler.transform(test)).select(
         "Id",
-        cutoff_udf("prediction").alias("rating"))
+        cutoff_udf("prediction").alias("rating")).orderBy("Id", ascending=True)
 
     print("Generating result.csv")
     result.coalesce(1).write.format("com.databricks.spark.csv").option("header", "true").save(
