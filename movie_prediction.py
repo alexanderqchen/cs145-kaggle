@@ -32,7 +32,7 @@ def get_initial_dfs(context, saved_initial_dfs):
             col("rating").cast("float").alias("rating"))
         val_ratings = context.read.format("csv").option("header", "true").load(
             os.path.join(script_dir, data_dir + "val_ratings.csv"))
-        val_ratings = train_ratings.select(
+        val_ratings = val_ratings.select(
             col("userId").cast("int").alias("userId"),
             col("movieId").cast("int").alias("movieId"),
             col("rating").cast("float").alias("rating"))
