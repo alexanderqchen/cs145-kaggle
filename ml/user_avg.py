@@ -1,16 +1,23 @@
-class MovieAverage:
+import numpy as np
+
+class UserAverage:
 	def train(self, data):
 		self.avg = data.groupby(['userId'])['rating'].mean()
 
 	def test(self, data):
-		predictions = []
+		predictions = np.zeros((data.shape[0], 2))
 
 		for index, row in data.iterrows():
+			id = int(row['Id'])
 			userId = row['userId']
 			prediction = self.avg[userId] if userId in self.avg else 3.535071681
 
-			print(f"user {userId} got rating {prediction}")
+			predictions[id][0] = id
+			predictions[id][1] = prediction
 
-			predictions.append(prediction)
+			print(id)
+
+
+		print(predictions)
 
 		return predictions

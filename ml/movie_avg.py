@@ -1,20 +1,23 @@
-import pandas as pd
+import numpy as np
 
 class MovieAverage:
 	def train(self, data):
 		self.avg = data.groupby(['movieId'])['rating'].mean()
 
 	def test(self, data):
-		predictions = pd.DataFrame(columns=['id', 'rating'])
+		predictions = np.zeros((data.shape[0], 2))
 
 		for index, row in data.iterrows():
-			id = row['Id']
+			id = int(row['Id'])
 			movieId = row['movieId']
 			prediction = self.avg[movieId] if movieId in self.avg else 3.535071681
 
-			prediction_df = pd.DataFrame({'id': id, 'rating': prediction}, index=[0])
+			predictions[id][0] = id
+			predictions[id][1] = prediction
 
-			predictions = predictions.append(prediction_df, ignore_index=True)
 			print(id)
+
+
+		print(predictions)
 
 		return predictions
