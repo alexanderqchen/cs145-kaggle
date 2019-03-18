@@ -17,7 +17,7 @@ def main():
     user_alias = user.select("userId", *((col(c)).alias("user_" + c) for c in user.columns[1:]))
 
     print("Calculating training vector....")
-    train_vec = train.sample(False, 0.001).join(movie_alias, "movieId", "left_outer").join(user_alias, "userId", "left_outer").select(
+    train_vec = train.sample(False, 0.01).join(movie_alias, "movieId", "left_outer").join(user_alias, "userId", "left_outer").select(
         "rating",
         *((col("movie_" + c) * col("user_" + c)).alias(c) for c in movie.columns[1:]))
     print("Calculating validation vector...")
