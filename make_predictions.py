@@ -4,16 +4,16 @@ from common import script_dir, data_dir, parquet_dir, model_dir, initSpark
 
 from joblib import load
 
+import pandas as pd
+
 def main():
-    context = initSpark()
     print("Loading model...")
     nn = load(os.path.join(script_dir, model_dir + "nn.model"))
     print("Loading data...")
-    test = context.read.parquet(os.path.join(script_dir, parquet_dir + "test_vec.parquet"))
-    test = test.toPandas()
+    test = pd.read_parquet(os.path.join(script_dir, parquet_dir + "test_vec.parquet"))
 
     print("Making predictions...")
-    test["rating"] = nn.predict(test.drop["Id"].fillna(0))
+    test["rating"] = nn.predict(test.drop("Id", axis=1).fillna(0))
     print("Saving predictions...")
     test[["Id", "rating"]].to_csv(os.path.join(script_dir, data_dir + "results.csv"), index=False)
     print("Done.")

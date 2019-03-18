@@ -8,7 +8,7 @@ data_dir = "csv/"
 parquet_dir = "parquets/"
 model_dir = "models/"
 executor_memory = "32G"
-driver_memory = "32G"
+driver_memory = "128G"
 max_result_size = "0"
 
 def initSpark():

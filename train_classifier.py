@@ -1,22 +1,20 @@
 import os
 import math
+import pandas as pd
 
-from common import script_dir, parquet_dir, model_dir, initSpark
+from common import script_dir, parquet_dir, model_dir
 
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_squared_error
 from joblib import dump
 
-def main():
-    context = initSpark()
-    print("Loading data...")
-    train = context.read.parquet(os.path.join(script_dir, parquet_dir + "train_vec.parquet"))
-    val = context.read.parquet(os.path.join(script_dir, parquet_dir + "val_vec.parquet"))
 
-    train = train.toPandas()
+def main():
+    print("Loading data...")
+    train = pd.read_parquet(os.path.join(script_dir, parquet_dir + "train_vec.parquet"))
+    val = pd.read_parquet(os.path.join(script_dir, parquet_dir + "val_vec.parquet"))
     train_x = train.drop("rating", axis=1).fillna(0)
     train_y = train["rating"].fillna(0)
-    val = val.toPandas()
     val_x = val.drop("rating", axis=1).fillna(0)
     val_y = val["rating"].fillna(0)
 
