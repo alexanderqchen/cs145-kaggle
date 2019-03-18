@@ -9,6 +9,7 @@ def main():
     nn = load(os.path.join(script_dir, models_dir + "nn.model"))
     test = context.read.parquet(os.path.join(script_dir, parquet_dir + "test_vec.parquet"))
 
+    test = test.toPandas()
     print("Making predictions...")
     test["rating"] = nn.predict(test.drop["Id"].fillna(0))
     print("Saving predictions...")
