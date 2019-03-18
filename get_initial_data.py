@@ -39,7 +39,7 @@ def main():
     user_vectors = train_ratings.join(movie_vectors, train_ratings.movieId == movie_vectors.movieId).select(
         "userId",
         "rating",
-        *((col(c) * (train_ratings.rating - 3) / 2).alias(c) for c in movie_vectors.columns[1:])
+        *((col(c) * (train_ratings.rating - 3.535) / 1.05).alias(c) for c in movie_vectors.columns[1:])
     ).groupBy("userId").agg(*(avg(c).alias(c) for c in movie_vectors.columns[1:]))
 
     print("Saving movie vector...")
