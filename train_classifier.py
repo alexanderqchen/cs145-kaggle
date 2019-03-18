@@ -10,8 +10,8 @@ from joblib import dump
 def main():
     context = initSpark()
     print("Loading data...")
-    train = context.read.parquet(os.path.join(script_dir, parquet_dir + "train_vec.parquet")
-    val = context.read.parquet(os.path.join(script_dir, parquet_dir + "val_vec.parquet")
+    train = context.read.parquet(os.path.join(script_dir, parquet_dir + "train_vec.parquet"))
+    val = context.read.parquet(os.path.join(script_dir, parquet_dir + "val_vec.parquet"))
 
     train = train.toPandas()
     train_x = train.drop("rating", axis=1).fillna(0)
@@ -21,11 +21,11 @@ def main():
     val_y = val["rating"].fillna(0)
 
     print("Training model...")
-    nn = MLPRegressor(hidden_layer_sizes=(100,), max_iter=1000, verbose=True)
+    nn = MLPRegressor(hidden_layer_sizes=(10,), max_iter=1000, verbose=True)
     nn.fit(train_x, train_y)
     print("Validation RMSE: ", math.sqrt(mean_squared_error(val_y, nn.predict(val_x))))
     print("Saving model...")
-    dump(nn, os.path.join(script_dir, models_dir + "nn.model"))
+    dump(nn, os.path.join(script_dir, model_dir + "nn.model"))
     print("Done.")
 
 
