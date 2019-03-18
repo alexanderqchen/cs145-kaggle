@@ -7,7 +7,7 @@ from joblib import load
 def main():
     context = initSpark()
     nn = load(os.path.join(script_dir, models_dir + "nn.model"))
-    test = context.read.parquet(os.path.join(script_dir, parquet_dir + "test_vec.parquet")
+    test = context.read.parquet(os.path.join(script_dir, parquet_dir + "test_vec.parquet"))
 
     print("Making predictions...")
     test["rating"] = nn.predict(test.drop["Id"].fillna(0))
