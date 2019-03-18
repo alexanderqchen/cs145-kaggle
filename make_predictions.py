@@ -6,10 +6,12 @@ from joblib import load
 
 def main():
     context = initSpark()
+    print("Loading model...")
     nn = load(os.path.join(script_dir, models_dir + "nn.model"))
+    print("Loading data...")
     test = context.read.parquet(os.path.join(script_dir, parquet_dir + "test_vec.parquet"))
-
     test = test.toPandas()
+
     print("Making predictions...")
     test["rating"] = nn.predict(test.drop["Id"].fillna(0))
     print("Saving predictions...")

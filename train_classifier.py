@@ -19,8 +19,9 @@ def main():
     val = val.toPandas()
     val_x = val.drop("rating", axis=1).fillna(0)
     val_y = val["rating"].fillna(0)
+
+    print("Training model...")
     nn = MLPRegressor(hidden_layer_sizes=(100,), max_iter=1000, verbose=True)
-    print("Training Model...")
     nn.fit(train_x, train_y)
     print("Validation RMSE: ", math.sqrt(mean_squared_error(val_y, nn.predict(val_x))))
     print("Saving model...")
