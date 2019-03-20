@@ -1,13 +1,14 @@
 import os
+
 import pandas as pd
-
-from common import script_dir, parquet_dir, initSpark
-
 from pyspark.sql.functions import col
 from sklearn.decomposition import IncrementalPCA
 
+from common import script_dir, parquet_dir, init_spark
+
+
 def main():
-    context = initSpark()
+    context = init_spark()
     print("Loading data...")
     movie = context.read.parquet(os.path.join(script_dir, parquet_dir + "movie_vectors.parquet"))
     user = context.read.parquet(os.path.join(script_dir, parquet_dir + "user_vectors.parquet"))

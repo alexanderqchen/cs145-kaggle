@@ -1,11 +1,12 @@
 import os
 
-from common import script_dir, data_dir, parquet_dir, initSpark
-
 from pyspark.sql.functions import avg, col
 
+from common import script_dir, data_dir, parquet_dir, init_spark
+
+
 def main():
-    context = initSpark()
+    context = init_spark()
     print("Loading data...")
     genome_scores = context.read.format("csv").option("header", "true").load(
         os.path.join(script_dir, data_dir + "genome-scores.csv"))
@@ -21,7 +22,7 @@ def main():
         col("rating").cast("float").alias("rating"))
     val_ratings = context.read.format("csv").option("header", "true").load(
         os.path.join(script_dir, data_dir + "val_ratings.csv"))
-    val_ratings = train_ratings.select(
+    val_ratings = val_ratings.select(
         col("userId").cast("int").alias("userId"),
         col("movieId").cast("int").alias("movieId"),
         col("rating").cast("float").alias("rating"))

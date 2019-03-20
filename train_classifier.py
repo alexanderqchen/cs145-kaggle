@@ -1,12 +1,12 @@
-import os
 import math
+import os
+
 import pandas as pd
+from joblib import dump
+from sklearn.metrics import mean_squared_error
+from sklearn.neural_network import MLPRegressor
 
 from common import script_dir, parquet_dir, model_dir
-
-from sklearn.neural_network import MLPRegressor
-from sklearn.metrics import mean_squared_error
-from joblib import dump
 
 
 def main():

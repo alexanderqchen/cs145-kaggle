@@ -1,16 +1,19 @@
 import io
-import boto3
 import os
+
+import boto3
 import pandas as pd
+from sagemaker.amazon.common import write_numpy_to_dense_tensor
 
 from common import script_dir, parquet_dir
 
-from sagemaker.amazon.common import write_numpy_to_dense_tensor
 
 def main():
     print("Loading data...")
-    train = pd.read_parquet(os.path.join(script_dir, parquet_dir + "train_vec.parquet")).fillna(0).to_numpy().astype("float32")
-    test = pd.read_parquet(os.path.join(script_dir, parquet_dir + "test_vec.parquet")).fillna(0).to_numpy().astype("float32")
+    train = pd.read_parquet(os.path.join(script_dir, parquet_dir + "train_vec.parquet")).fillna(0).to_numpy().astype(
+        "float32")
+    test = pd.read_parquet(os.path.join(script_dir, parquet_dir + "test_vec.parquet")).fillna(0).to_numpy().astype(
+        "float32")
 
     bucket = "cs145sagemaker"
     train_key = "trainingData"
@@ -18,11 +21,11 @@ def main():
     print("Training data will be uploaded to: {}".format(train_location))
     test_key = "testData"
     test_location = "s3://{}/{}".format(bucket, test_key)
-    print("Test data will be uploaded to: {}".format(train_location))
+    print("Test data will be uploaded to: {}".format(test_location))
 
     print("Converting training data...")
     buf = io.BytesIO()
-    write_numpy_to_dense_tensor(buf, train[:,1:], train[:,0])
+    write_numpy_to_dense_tensor(buf, train[:, 1:], train[:, 0])
     buf.seek(0)
 
     print("Uploading training data...")
@@ -30,7 +33,7 @@ def main():
 
     print("Converting test data...")
     buf = io.BytesIO()
-    write_numpy_to_dense_tensor(buf, test[:,1:], test[:,0])
+    write_numpy_to_dense_tensor(buf, test[:, 1:], test[:, 0])
     buf.seek(0)
 
     print("Uploading test data...")

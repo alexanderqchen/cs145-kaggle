@@ -11,7 +11,8 @@ executor_memory = "32G"
 driver_memory = "128G"
 max_result_size = "0"
 
-def initSpark():
+
+def init_spark():
     conf = SparkConf().setAppName("CS145 Project")
     conf = conf.setMaster("local[*]").set(
         "spark.executor.memory",

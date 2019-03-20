@@ -1,10 +1,10 @@
 import os
 
-from common import script_dir, data_dir, parquet_dir, model_dir, initSpark
-
+import pandas as pd
 from joblib import load
 
-import pandas as pd
+from common import script_dir, data_dir, parquet_dir, model_dir
+
 
 def main():
     print("Loading model...")
