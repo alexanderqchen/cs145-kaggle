@@ -5,6 +5,7 @@ from sklearn.decomposition import IncrementalPCA
 
 from common import script_dir, parquet_dir
 
+
 def main():
     print("Loading training data...")
     train_vec = pd.read_parquet(os.path.join(script_dir, parquet_dir + "train_vec_spark.parquet")).fillna(0)
