@@ -9,9 +9,9 @@ from sagemaker.amazon.common import write_numpy_to_dense_tensor
 
 def main():
     print("Loading data...")
-    train = pd.read_parquet(os.path.join(script_dir, parquet_dir + "train_vec.parquet")).to_numpy()
+    train = pd.read_parquet(os.path.join(script_dir, parquet_dir + "train_vec.parquet")).fillna(0).to_numpy().astype("float32")
 
-    bucket = "cs145projectucla"
+    bucket = "cs145sagemaker"
     data_key = "trainingData"
     data_location = "s3://{}/{}".format(bucket, data_key)
     print("Training data will be uploaded to: {}".format(data_location))

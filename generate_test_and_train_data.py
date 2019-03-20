@@ -3,6 +3,7 @@ import os
 from common import script_dir, parquet_dir, initSpark
 
 from pyspark.sql.functions import col
+from pyspark.ml.feature import PCA, VectorAssembler
 
 def main():
     context = initSpark()
@@ -29,6 +30,28 @@ def main():
         "Id",
         *((col("movie_" + c) * col("user_" + c)).alias(c) for c in movie.columns[1:]))
 
+    assembler = VectorAssembler(
+        inputCols=[c for c in train.columns[1:]],
+        outputCol="features",
+        handleInvalid="keep")
+
+    print("Adding training feature column...")
+    train_vec = assembler.transform(train_vec)
+    print("Adding validation feature column...")
+    val_vec = assembler.transform(val_vec)
+    print("Adding test feature column...")
+    test_vec = assembler.transform(test_vec)
+
+    pca = PCA(k=20, inputCol="features", outputCol="pca_features")
+    print("Fitting PCA model...")
+    model = pca.fit(assembler.fit(train_vec))
+    print("Reducing training dimensionality...")
+    train_vec = model.transform(train_vec).rdd.map(extractWithRating).toDF(["rating"])
+    print("Reducing validation dimensionality...")
+    val_vec = model.transform(val_vec).rdd.map(extractWithRating).toDF(["rating"])
+    print("Reducing test dimensionality...")
+    test_vec = model.transform(test_vec).rdd.map(extractWithId).toDF(["Id"])
+
     print("Saving train vector...")
     train_vec.write.parquet(os.path.join(script_dir, parquet_dir + "train_vec.parquet"))
     print("Saving validation vector...")
@@ -36,6 +59,14 @@ def main():
     print("Saving test vector...")
     test_vec.write.parquet(os.path.join(script_dir, parquet_dir + "test_vec.parquet"))
     print("Done.")
+
+
+def extractWithRating(row):
+    return (row.rating, ) + tuple(row.pca_features.toArray().tolist())
+
+
+def extractWithId(row):
+    return (row.Id, ) + tuple(row.pca_features.toArray().tolist())
 
 
 if __name__ == "__main__":
