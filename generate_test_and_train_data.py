@@ -31,7 +31,7 @@ def main():
         *((col("movie_" + c) * col("user_" + c)).alias(c) for c in movie.columns[1:]))
 
     assembler = VectorAssembler(
-        inputCols=[c for c in train.columns[1:]],
+        inputCols=[c for c in movie.columns[1:]],
         outputCol="features",
         handleInvalid="keep")
 
@@ -42,9 +42,9 @@ def main():
     print("Adding test feature column...")
     test_vec = assembler.transform(test_vec)
 
-    pca = PCA(k=20, inputCol="features", outputCol="pca_features")
+    pca = PCA(k=100, inputCol="features", outputCol="pca_features")
     print("Fitting PCA model...")
-    model = pca.fit(assembler.fit(train_vec))
+    model = pca.fit(train_vec)
     print("Reducing training dimensionality...")
     train_vec = model.transform(train_vec).rdd.map(extractWithRating).toDF(["rating"])
     print("Reducing validation dimensionality...")
