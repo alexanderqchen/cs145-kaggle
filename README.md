@@ -1,36 +1,17 @@
-# COM SCI 145 Kaggle Contest
+# COM SCI 145 Kaggle Contest - Team Combination Pizza Hut and Taco Bell
+# Jennie Zheng, Yijing Zhou, Alex Chen, Michael Wu, Danny Nguyen
 
-## Organization
+## Dependencies
+The program assumes that python's surprise library is installed. If not, please run
+`pip3 install surprise`
+
 ### csv
-The config file assumes you store all of your csv files in a folder named csv.
-### data
-The data folder contains classes or modules relevant to data and data processing.
-### ml
-The ml folder contains classes that define classifiers.
+All the relevant kaggle-competition data should be downloaded and stored here.
 
-## Conventions
-### Internal Data Structures
-Internally, all data is passed around as lists of dictionaries. Each dictionary maps the column name to the value for that instance. E.g. the csv file
-```
-userId,movieId,rating
-1,1,4.0
-1,2,3.5
-```
-would be structured like
-```
-[
-  {
-    'userId': 1,
-    'movieId': 1,
-    'rating': 4.0
-  },
-  {
-    'userId': 1,
-    'movieId': 2,
-    'rating': 3.5
-  }
-]
-```
+### Running Program
+To run the program, issue `python svd.pp` to begin training the ensemble of 50 SVD models on the raw data.
+This may take awhile as each of the models is trained for 35 epochs.
 
-## Note
-We gon win this thing ez.
+### Notes
+The python surprise package works directly with the raw {userId, movieId, rating} tuples. There was no need
+to preprocess the data or to incorporate any additional features into training our models.
